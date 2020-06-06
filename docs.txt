@@ -36,3 +36,22 @@
 3 - можно выполнять простые взаимодействия которые можно привести к строке
   - {{2+1}} // 3, {{'string' + ' js'}} // string js, {{[1,2,3]}} // 1,2,3
 
+-----------------------------
+
+Binding - привязка данных
+1 - для односторонней связки html с ts оборачиваем свойство в [] скобки. Например <img [src]='img'/>
+  и передаем туда переменную
+2 - для event binding односторонней связки ts с html оборачиваем события в () скобки, указываем метод и передаем event
+  <input type="text" (keyup.enter)="onInput($event)">
+  onInput(e: KeyboardEvent) {this.val = (<HTMLInputElement>e.target).value}
+3 - создаем локальную ссылку для элемента и далее получаем к нему доступ и можем передать эвент таким образом
+  <input (blur)="onBlur(myInput.value)" #myInput>
+  onBlur(str: string) {this.val = str}
+4 - way binding двухстороннее связывание ts с html
+  - создаем переменную с каким то начальным значением например value и байндим в элемент
+    <input type="text" [value]="value">
+  - добавляем байндинг события
+    <input type="text" [value]="value" (input)="onInput($event)">
+5 - связывание с помощью ngModel
+  - импортируем в модуль (app.module.ts например) FormsModule
+  - <input type="text" [(ngModel)]="value"> теперь value меняется при динамическом вводе текста
