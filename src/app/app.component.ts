@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 export interface IPost {
   title: string;
   text: string;
-  id?: number;
+  id?: string;
 }
 
 @Component({
@@ -18,4 +18,8 @@ export class AppComponent {
     {title: 'React Native', text: 'Learn RN'},
     {title: 'NodeJs', text: 'Learn Node'},
   ];
+
+  addPost(post: IPost) {
+    this.posts.unshift(post);
+  }
 }
