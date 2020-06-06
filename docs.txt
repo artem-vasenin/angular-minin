@@ -81,4 +81,9 @@ Binding - привязка данных
   - <p *ngFor="let item of arrItems">{{item}}</p>
   - <p *ngFor="let item of arrItems; let idx = index">{{idx}}-{{item}}</p> - итерация с индексом
 
+------------------------------
+
+Пайпы - трансформеры для изменения отображения данных
+  - {{ myDate | date:'small' | lowercase }}
+
 15
