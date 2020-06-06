@@ -15,4 +15,7 @@
 4 - (не обязательно) создаем файл стилей компонента post.component.scss
   - подключаем стили в post.component.ts в декораторе @Component передавая в параметры:
     - styleUrls: ['./post.component.scss'],
+Компоненты - cli
+1 - ng g(generate) c(component) post --skipTests
+  - ангулар автоматически создает и импортирует компонент и сбрасывает тесты
 
