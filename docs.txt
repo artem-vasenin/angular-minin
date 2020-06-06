@@ -55,3 +55,30 @@ Binding - привязка данных
 5 - связывание с помощью ngModel
   - импортируем в модуль (app.module.ts например) FormsModule
   - <input type="text" [(ngModel)]="value"> теперь value меняется при динамическом вводе текста
+6 - если функция состоит из одной строки то можно ее объявить прямо в эвенте
+  - <button (click)="imgStyles = {width: '300px', height: '300px'}">big</button>
+
+------------------------------
+
+Директивы - вспомогательные атрибуты для управления хтмл элепентов и компонентов
+1 - ngStyle
+  - при добавлении к элементу мы байндим ngStyle
+    <div [ngStyle]="{width: '200px', borderRadius: '5px'}"></div>
+2 - ngClass
+  - <div [ngClass]="{active: title === 'active', hidden: !title}"></div>
+  - <div [class.active]="title === 'active'" [class.hidden]="!title"></div>
+3 - ngIf else - структурные
+  - <div *ngIf="title === 'active'"></div> - одно условие
+  - <div *ngIf="title === 'active'; else emptyText"></div> - условие с иначе
+    <ng-template><div #emptyText>Пусто</div></ng-template> - контейнер для иначе
+4 - ngSwitch
+  - <div [ngSwitch]="title">
+      <p *ngSwitchCase="'active'">case 1</p>
+      <p *ngSwitchCase="'not active'">case 2</p>
+      <p *ngSwitchDefault>case 3</p>
+    </div>
+5 - ngFor
+  - <p *ngFor="let item of arrItems">{{item}}</p>
+  - <p *ngFor="let item of arrItems; let idx = index">{{idx}}-{{item}}</p> - итерация с индексом
+
+15

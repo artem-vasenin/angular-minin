@@ -1,3 +1,5 @@
 <h3>{{title}}</h3>
 
-<img [src]="imgNg" alt="img">
+<button (click)="imgStyles = {width: '300px', height: '300px'}">big</button>
+
+<img [src]="imgNg" alt="img" [ngStyle]="imgStyles">
