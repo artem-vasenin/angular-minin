@@ -1,0 +1,18 @@
+1 -  npm install -g @angular/cli устанавливаем ангулар кли глобально
+2 - ng new my-first-project генерируем наш проект
+
+Компоненты - ручной режим
+1 - создаем каталог для компонента (например post)
+2 - создаем файл компонента post.component.ts (главный файл)
+  - импортируем Component декоратор из @angular/core
+  - всё является классами поэтому экспортируем класс PostComponent
+  - объявляем декоратор @Component для нашего класса и передаем туда объект опций:
+    - selector: 'app-post'
+    - templateUrl: './post.component.html'
+  - нам ts подсказывает что наш компонент не объявлен в app.module. Объявляем его в declarations
+  - теперь мы можем вывести наш компонент в шаблоне app.component.html тегом <app-post></app-post>
+3 - создаем файл шаблона компонента post.component.html
+4 - (не обязательно) создаем файл стилей компонента post.component.scss
+  - подключаем стили в post.component.ts в декораторе @Component передавая в параметры:
+    - styleUrls: ['./post.component.scss'],
+
