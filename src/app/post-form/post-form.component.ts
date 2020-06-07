@@ -1,4 +1,4 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {Component, ElementRef, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
 import {IPost} from '../app.component';
 
 @Component({
@@ -11,6 +11,7 @@ export class PostFormComponent implements OnInit {
   text = '';
 
   @Output() onAdd: EventEmitter<IPost> = new EventEmitter<IPost>();
+  @ViewChild('titleInput', {static: false}) titleInputRef: ElementRef;
 
   constructor() { }
 
@@ -27,5 +28,9 @@ export class PostFormComponent implements OnInit {
       this.onAdd.emit(post);
       this.title = this.text = '';
     }
+  }
+
+  setFocus() {
+    this.titleInputRef.nativeElement.focus();
   }
 }
