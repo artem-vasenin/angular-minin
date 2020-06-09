@@ -121,7 +121,7 @@ Binding - привязка данных
 
 ------------------------------
 
-Директивы - вспомогательные атрибуты для управления хтмл элепентов и компонентов
+Директивы - вспомогательные атрибуты для управления хтмл элепентов и компонентов (атрибутные и структурные)
 1 - ngStyle
   - при добавлении к элементу мы байндим ngStyle
     <div [ngStyle]="{width: '200px', borderRadius: '5px'}"></div>
@@ -142,6 +142,62 @@ Binding - привязка данных
   - <p *ngFor="let item of arrItems">{{item}}</p>
   - <p *ngFor="let item of arrItems; let idx = index">{{idx}}-{{item}}</p> - итерация с индексом
 
+Создание своих директив
+1 - Создаем файл для директивы myDir.directive.ts и экспортируем класс
+  StyleDirective к которому применяем декоратор @Directive
+2 - В декоратор передаем объект с параметром selector и присваеваем ему
+  значение имени директивы selector: '[myDir]' в скобках
+3 - Импортируем директиву в модуле в массиве declarations
+4 - ng g d directives/myDir --skipTests - автоматическая генерация директивы
+5 - Чтобы получить доступ до элемента который вызвал директиву делаем инъекцию
+  constructor(private elRef: ElementRef) {elRef.nativeElement.style.color = 'green';}
+  и описываем нужное нам изменение объекта, это будет работать в вебе но...
+  - для универсальности работы с мобилками надо подключить Renderer2 из @angular/core
+  constructor(private elRef: ElementRef, private renderer: Renderer2) {
+    this.renderer.setStyle(this.elRef.nativeElement, 'color', 'green');
+  }
+6 - Затем применяем директиву в шаблоне <span myDir>Some text</span>
+
+Добавление событий
+- добавляем декоратор @HostListener куда передаем имя события, эвент и метод который отработает
+  @HostListener('click', ['$event']) onClick(event: Event) {
+    this.elRef.nativeElement.style.color = 'red'; } // и при клике сменится цвет
+
+Передача параметров в директиву
+- если мы хотим передавать в директиву какие то параметры <span myDir="red">Some text</span> то
+- необходимо импортировать в директиву декоратор @Input и применить его на входящие параметры
+  @Input('appStyle') color: string = 'orange'; // по умолчанию оранж, это вариант получения
+  this.renderer.setStyle(this.elRef.nativeElement, 'color', this.color); // в хостЛистенере пишем наше свойство цвета
+- также можно используя директиву на элементе передавать ему и другие параметры и принять их в директиве
+  <span myDir="red" fontWeight="bold">Some text</span>
+  @Input('appStyle') fontWeight: string = 'normal';
+  this.renderer.setStyle(this.elRef.nativeElement, 'fontWeight', this.fontWeight); // добавляем стиль
+- можно передать мобъект стилей а не поштучно, тогда свойство надо забайндить
+  [dStyles]="{textDecoration: 'underline', textTransform: 'uppercase'}"
+  @Input() dStyles: {textDecoration?: string, textTransform?: string}; // разрешаем некоторые стили
+
+Декоратор @HostBinding
+- можно добавлять стили без референции элемента, просто применяем декоратор @HostBinding
+  @HostBinding('style.backgroundColor') bg = null;
+- и далее просто меняем значение переменной bg передавая туда данные из свойств
+  this.bg = this.dStyles.bg;
+
+Структурные директивы
+- звездочка перед структурной директивой лишь обозначает что элемент будет завернут в ng-template а само
+  условие например будет передано именно в него типа данного примера:
+  <p *ngIf="show">some</p> поменяется на такой вид:
+  <ng-template [ngIf]="show"><p>some</p></ng-template>
+1 - создаем свою структурную директиву: ng g d ifnot --skipTests
+2 - инжектируем в конструктор директивы из @angular/core две сущности:
+  constructor(private templateRef: TemplateRef<any>, private viewContainer: ViewContainerRef){...}
+  - TemplateRef - указывает на содержимое будущего ng-template (элементы подвергаемые условию)
+  - ViewContainerRef - указывает на сам контейнер ng-template куда завернётся содержимое
+3 - принимаем с помощью декоратора @Input параметром метод который примет в свою очередь параметр,
+  который мы передадим в директиву (условие)
+  @Input() set ifNot(condition: boolean) { condition
+    ? this.viewContainer.createEmbeddedView(this.templateRef) // если попали, то заварачиваем в контейнер
+    : this.viewContainer.clear()} // если не папали то очищаем контейнер
+
 ------------------------------
 
 Пайпы - трансформеры для изменения отображения данных
@@ -160,4 +216,4 @@ Binding - привязка данных
   setFocus() { this.titleInputRef.nativeElement.focus(); }
   доступ идет через nativeElement, делается это для универсальности (мы работаем еще и с мобилками)
 
-3. Компоненты в деталях / 8
+4. Директивы / 6

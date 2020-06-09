@@ -9,7 +9,12 @@
     *ngFor="let p of posts"
     [post]="p"
   >
-    <small *ngIf="p.text.length > 10; else shortPost">Long post</small>
+    <small
+      appStyle="violet"
+      fontWeight="bold"
+      [dStyles]="{textDecoration: 'underline', textTransform: 'uppercase', bg: 'yellow'}"
+      *ngIf="p.text.length > 10; else shortPost"
+    >Long post</small>
     <ng-template #shortPost>Short post</ng-template>
   </app-post>
 </div>
