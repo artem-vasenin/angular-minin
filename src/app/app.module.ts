@@ -6,6 +6,7 @@ import { PostFormComponent } from './post-form/post-form.component';
 import { PostComponent } from './post/post.component';
 import {FormsModule} from '@angular/forms';
 import {StyleDirective} from './directives/style.directive';
+import {PostFilterPipe} from './pipes/post-filter.pipe';
 
 @NgModule({
   declarations: [
@@ -13,6 +14,7 @@ import {StyleDirective} from './directives/style.directive';
     PostFormComponent,
     PostComponent,
     StyleDirective,
+    PostFilterPipe,
   ],
   imports: [
     BrowserModule,

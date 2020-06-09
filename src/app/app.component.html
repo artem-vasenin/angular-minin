@@ -4,9 +4,10 @@
   <app-post-form (onAdd)="addPost($event)"></app-post-form>
 
   <hr>
-
+  <input type="text" [(ngModel)]="search" placeholder="Search">
+  <br>
   <app-post
-    *ngFor="let p of posts"
+    *ngFor="let p of posts | postFilter:search"
     [post]="p"
   >
     <small

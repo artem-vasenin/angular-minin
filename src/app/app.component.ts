@@ -18,6 +18,8 @@ export class AppComponent {
     {title: 'React Native', text: 'Learn RN'},
     {title: 'NodeJs', text: 'Learn Node'},
   ];
+  search = '';
+  date = new Date();
 
   addPost(post: IPost) {
     this.posts.unshift(post);
