@@ -235,7 +235,18 @@ Binding - привязка данных
 входящем значении в метод трансформ. Это можно изменить добавив в декоратор @Pipe свойство pure: false
 
 Асинхронные пайпы
-
+- Если у нас есть асинхронные данные возвращаемые промисом, мы можем использовать пайп async который
+вернет данные которые мы передаём в метод resolve отработоашего промиса
+  prom: Promise<string> = new Promise<string>(resolve => {
+      setTimeout(() => resolve('promise finish'), 4000);
+    });
+  <p>Wait for async... {{prom | async}}</p> // Wait for async... и через 4с promise finish
+- Также если у нас есть Observable данные которые требуют подписки на стрим мы можем вернуть данные
+  с помощью пайпа async
+  date: Observable<Date> = new Observable<Date>(obs => {
+    setInterval(() => obs.next(new Date()), 1000);
+  });
+  <p>Date: {{date | async | date:'mediumTime'}}</p>
 
 ------------------------------
 
