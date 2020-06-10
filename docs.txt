@@ -261,4 +261,64 @@ Binding - привязка данных
   setFocus() { this.titleInputRef.nativeElement.focus(); }
   доступ идет через nativeElement, делается это для универсальности (мы работаем еще и с мобилками)
 
-4. Директивы / 6
+------------------------------
+
+RxJs - библиотека для работы с разными типами данных, событий, объектов и т.д. Удобно работает с асинхронными
+данными. Удобно тем, что можно данные обернуть в стрим и в другом месте на них подписаться
+- Импорты берутся из 2 библиотек. Из rxjs и rxjs/operators
+  rxjs - для элементов создающих новые стримы
+  rxjs/operators - относится к операторам
+- const intervalStream$ = interval(1000) - вернет стрим объект (реактивные переменные помечаем $)
+  который содержит метод subscribe принимающий в себя КБ ф-цию которая принимает некоторое значение
+- с помощью subscribe мы можем подписываться на изменения происходящие в стриме и взаимодействовать с ними
+
+Оптимизация стримов
+- подписки на стримы необходимо прекращать для предотвращения утечки памяти
+- для этого создаем переменную напрмиер sub: Subscription и в нее записываем результат работы subscribe
+  sub: Subscription - переменная будет отвечать за подписку
+  this.sub = intervalStreams$.subscribe(val => console.log(val))
+  stop() {this.sub.unsubscribe()} - теперь мы можем отписаться от подписки на событие в каком либо методе
+
+Операторы RxJS https://rxjs-dev.firebaseapp.com/guide/operators
+- у стримов имеется метод pipe позволяющий применять операторы и их множество
+- import {map, filter} from 'rxjs/operators' импортируем пару операторов
+- теперь в pipe передаем эти операторы
+  this.sub = intervalStreams$
+    .pipe(
+      filter(val => val % 2 === 0), - по приколу фильтруем четные значения (методы через запятую применяем)
+      map(val => `maped value: ${val}`), - по приколу преобразуем значение в строку
+    )
+    .subscribe(val => console.log(val))
+
+Создание своего стрима
+1 - import {Observable} from 'rxjs' - импортируем класс обсервер.
+2 - создаем стрим как экземпляр класса Observable конструктор которого принимает КБ с параметром observer
+  const stream$ = new Observable(observer => { setTimeout(() => observer.next('finish'), 5000); });
+3 - теперь мы можем подписаться на созданный стрим
+  this.sub = stream$.subscribe(val => console.log(val));
+4 - мы можем выбросить ошибку при каких то условиях
+  const stream$ = new Observable(observer => { setTimeout(() => observer.error('WRONG'), 2000); });
+5 - мы можем завершить стрим вызовом метода complete
+  const stream$ = new Observable(observer => { setTimeout(() => observer.complete(), 1000); });
+6 - метод subscribe принимает 3 КБ
+  this.sub = stream$.subscribe(
+    val => console.log(val), // если все пошло как надо (обязательная)
+    err => console.error(err), // если все пошло не так
+    () => console.info('complete'), // если принудительно завершили (если не было никаких ошибок!)
+  );
+
+- метод next в обсервере равносилен методу resolve в промисе. Говорит об успехе
+- метод error в обсервере равносилен reject в промисе и говорит о неудаче (прекращает работу стрима)
+
+Subject - класс позволяющий осоздавать стримы, тут мы можем не только подписываться но и эмитить события
+1 - import {Subject} from 'rxjs'
+2 - stream$: Subject<void> = new Subject<void>; // создаем стрим с пустыми типами данных
+3 - this.sub = stream$.subscribe(val => console.log(val)); // подписываемся на стрим
+4 - создаем к примеру кнопку дёргающую метод next
+  <button (click)="next()">Next</button>
+5 - создаем метод для работы с событием кнопки где дергаем метод next для обсервера
+  next() {this.sub.next()}
+
+
+17. Бонус. Основы RxJS - !!!
+6. Сервисы / 1

@@ -33,6 +33,14 @@ export class AppComponent implements OnInit{
   });
   date2: Date;
 
+  constructor() {
+    const stream$ = new Observable(observer => {
+      setTimeout(() => observer.next('finish'), 5000);
+    });
+
+    stream$.subscribe(val => console.log(val));
+  }
+
   addPost(post: IPost) {
     this.posts.unshift(post);
   }
