@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Observable} from 'rxjs';
+import {AppCounterService} from './services/app-counter.service';
 
 export interface IPost {
   title: string;
@@ -33,7 +34,9 @@ export class AppComponent implements OnInit{
   });
   date2: Date;
 
-  constructor() {
+  constructor(
+    private appCounterService: AppCounterService
+  ) {
     const stream$ = new Observable(observer => {
       setTimeout(() => observer.next('finish'), 5000);
     });

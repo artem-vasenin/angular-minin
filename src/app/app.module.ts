@@ -7,6 +7,7 @@ import { PostComponent } from './post/post.component';
 import {FormsModule} from '@angular/forms';
 import {StyleDirective} from './directives/style.directive';
 import {PostFilterPipe} from './pipes/post-filter.pipe';
+import {AppCounterService} from './services/app-counter.service';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,9 @@ import {PostFilterPipe} from './pipes/post-filter.pipe';
     BrowserModule,
     FormsModule,
   ],
-  providers: [],
+  providers: [
+    AppCounterService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

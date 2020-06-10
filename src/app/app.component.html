@@ -22,4 +22,10 @@
   <p>Wait for async... {{prom | async}}</p>
   <p>Date: {{date | async | date:'mediumTime'}}</p>
   <p>Date2: {{date2 | date:'mediumTime'}}</p>
+  <hr/>
+  <div class="card">
+    <h3>Counter: {{appCounterService.counter}}</h3>
+    <button class="btn" (click)="appCounterService.decrease()">-</button>
+    <button class="btn" (click)="appCounterService.increase()">+</button>
+  </div>
 </div>
