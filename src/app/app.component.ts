@@ -11,7 +11,7 @@ export interface IPost {
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit{
   posts: IPost[] = [
@@ -35,7 +35,7 @@ export class AppComponent implements OnInit{
   date2: Date;
 
   constructor(
-    private appCounterService: AppCounterService
+    public appCounterService: AppCounterService
   ) {
     const stream$ = new Observable(observer => {
       setTimeout(() => observer.next('finish'), 5000);
