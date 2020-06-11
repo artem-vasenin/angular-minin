@@ -13,7 +13,7 @@ export interface IPost {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnInit{
+export class AppComponent implements OnInit {
   posts: IPost[] = [
     {title: 'JS', text: 'Learn JavaScript'},
     {title: 'Angular', text: 'Learn Angular 9'},

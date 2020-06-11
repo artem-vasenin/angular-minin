@@ -5,12 +5,14 @@ import {LogService} from './log.service';
 export class AppCounterService {
   counter = 0;
 
-  constructor(private logService: LogService) {}
+  constructor(private logService: LogService) {
+  }
 
   increase() {
     this.logService.log('increase');
     this.counter++;
   }
+
   decrease() {
     this.logService.log('decrease');
     this.counter--;

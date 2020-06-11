@@ -1,5 +1,6 @@
 import {Component, ElementRef, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
 import {IPost} from '../app.component';
+import {FormControl, FormGroup} from '@angular/forms';
 
 @Component({
   selector: 'app-post-form',
@@ -7,6 +8,7 @@ import {IPost} from '../app.component';
   styleUrls: ['./post-form.component.scss']
 })
 export class PostFormComponent implements OnInit {
+  form: FormGroup;
   title = '';
   text = '';
 
@@ -15,7 +17,11 @@ export class PostFormComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit(): void {
+  ngOnInit() {
+    this.form = new FormGroup({
+      title: new FormControl(''),
+      text: new FormControl(''),
+    });
   }
 
   addPost() {
@@ -28,9 +34,5 @@ export class PostFormComponent implements OnInit {
       this.onAdd.emit(post);
       this.title = this.text = '';
     }
-  }
-
-  setFocus() {
-    this.titleInputRef.nativeElement.focus();
   }
 }
