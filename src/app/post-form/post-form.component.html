@@ -1,24 +1,44 @@
 <div>
   <form class="card" [formGroup]="form" (ngSubmit)="addPost()">
-    <input
-      type="text"
-      class="form-control"
-      placeholder="Title"
-      [(ngModel)]="title"
-      formControlName="title"
-    >
-    <input
-      type="text"
-      class="form-control"
-      placeholder="Text"
-      [(ngModel)]="text"
-      formControlName="text"
-    >
-    <select formControlName="countries">
-      <option value="ru">Россия</option>
-      <option value="by">Беларусь</option>
-      <option value="kz">Казахстан</option>
-    </select>
-    <button class="btn" type="submit">Add Post</button>
+    <div class="form-field">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Title"
+        [(ngModel)]="title"
+        formControlName="title"
+      >
+      <div class="validation" *ngIf="form.get('title').invalid && form.get('title').touched">
+        <small>Поле не может быть пустым</small>
+      </div>
+    </div>
+    <div class="form-field">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Text"
+        [(ngModel)]="text"
+        formControlName="text"
+      >
+      <div class="validation" *ngIf="form.get('text').invalid && form.get('text').touched">
+        <small *ngIf="form.get('text').errors.required">
+          Поле не может быть пустым
+        </small>
+        <small *ngIf="form.get('text').errors.minlength.requiredLength">
+          Поле должно быть длиннее {{form.get('text').errors.minlength.requiredLength}} символов
+        </small>
+      </div>
+    </div>
+    <div class="form-field">
+      <select formControlName="countries">
+        <option value="ru">Россия</option>
+        <option value="by">Беларусь</option>
+        <option value="kz">Казахстан</option>
+      </select>
+      <div class="validation" *ngIf="form.get('countries').invalid && form.get('countries').touched">
+        <small>Поле не может быть пустым</small>
+      </div>
+    </div>
+    <button class="btn" type="submit" [disabled]=form.invalid>Add Post</button>
   </form>
 </div>

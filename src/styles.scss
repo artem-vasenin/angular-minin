@@ -64,6 +64,11 @@ img {
   margin: 0.7rem 0;
 }
 
+.form-field {
+  padding-bottom: 30px;
+  position: relative;
+}
+
 input,
 select,
 textarea {
@@ -72,7 +77,19 @@ textarea {
   padding: 0.4rem;
   font-size: 1.2rem;
   border: 1px solid #ccc;
-  margin: 1.2rem 0;
+
+  &.ng-invalid.ng-touched {
+    border-color: red;
+  }
+
+  &.ng-valid.ng-touched {
+    border-color: green;
+  }
+}
+.validation {
+  color: red;
+  position: absolute;
+  bottom: 10px;
 }
 
 hr {

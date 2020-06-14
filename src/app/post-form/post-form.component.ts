@@ -1,6 +1,6 @@
 import {Component, ElementRef, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
 import {IPost} from '../app.component';
-import {FormControl, FormGroup} from '@angular/forms';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
 
 @Component({
   selector: 'app-post-form',
@@ -19,20 +19,26 @@ export class PostFormComponent implements OnInit {
 
   ngOnInit() {
     this.form = new FormGroup({
-      title: new FormControl(''),
-      text: new FormControl(''),
+      title: new FormControl('', Validators.required),
+      text: new FormControl('', [Validators.required, Validators.minLength(10)]),
+      countries: new FormControl('', Validators.required),
     });
   }
 
   addPost() {
-    if (this.text.trim() && this.title.trim()) {
-      const post: IPost = {
-        id: Date.now().toString(),
-        title: this.title,
-        text: this.text,
-      };
-      this.onAdd.emit(post);
-      this.title = this.text = '';
+    // if (this.text.trim() && this.title.trim()) {
+    //   const post: IPost = {
+    //     id: Date.now().toString(),
+    //     title: this.title,
+    //     text: this.text,
+    //   };
+    //   this.onAdd.emit(post);
+    //   this.title = this.text = '';
+    // }
+    if (this.form.valid) {
+      console.log(this.text.trim() && this.title.trim());
+    } else {
+      console.log('invalid');
     }
   }
 }
