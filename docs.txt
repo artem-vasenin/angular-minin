@@ -484,5 +484,30 @@ HTTP Client
     return next.handle(req); // обязательно к возврату (является стримом поэтому можем юзать пайпы)
   }
 
+-------------------------------------
+
+Роутинг
+1 - создаем модуль app-routing.module.ts
+  - импортируем @NgModule из @angular/core
+  - применяем декоратор и передаем туда опции:
+    * прописываем импорты для роутера imports: [RouterModule] из @angular/router
+    * прописываем экспорт exports: [RouterModule]
+2 - импортируем наш роутер модуль в модулях корневого app
+  imports: [AppRoutingModule]
+3 - создаем в классе роутера начальное состояние
+  роутера const routes: Routes = [];
+  - передаем переменную в параметра декоратора @NgModule проутера в методе forRoot
+    imports: [RouterModule.forRoot(routes)],
+4 - регистрируем роуты в константе routes
+  const routes: Routes = [{path: '', component: HomeComponent}];
+5 - добавляем на страницу где будут отрисовываться страницы роутера тег
+  <router-outlet></router-outlet>
+6 - в ссылках меню вместо href добавляем атрибут routerLink="/about" или так:
+  [routerLink]="['/about']"
+  - актуальный роут можно проверить директивой routerLinkActive и добавить ему класс
+  <li routerLinkActive="active"></li> // активный роут получит класс active
+  - если нужно точное совпадение роута то ставим директиву:
+    [routerLinkActiveOptions]={exact: true} // если true то активныб будет точное совпадение
+  
 
 9. Мультистраничность с роутингом / 1

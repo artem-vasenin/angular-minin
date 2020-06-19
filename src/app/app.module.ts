@@ -7,6 +7,10 @@ import {PostFormComponent} from './post-form/post-form.component';
 import {PostComponent} from './post/post.component';
 import {StyleDirective} from './directives/style.directive';
 import {PostFilterPipe} from './pipes/post-filter.pipe';
+import { HomeComponent } from './home/home.component';
+import { AboutComponent } from './about/about.component';
+import {AppRoutingModule} from './app-routing.module';
+import { PostsComponent } from './posts/posts.component';
 
 @NgModule({
   declarations: [
@@ -15,11 +19,15 @@ import {PostFilterPipe} from './pipes/post-filter.pipe';
     PostComponent,
     StyleDirective,
     PostFilterPipe,
+    HomeComponent,
+    AboutComponent,
+    PostsComponent,
   ],
   imports: [
     BrowserModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    AppRoutingModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,24 +1,6 @@
 <div class="container">
   <h1>Angular components</h1>
 
-  <app-post-form (onAdd)="addPost($event)"></app-post-form>
-
-  <hr>
-  <input type="text" [(ngModel)]="search" placeholder="Search">
-  <br>
-  <app-post
-    *ngFor="let p of posts | postFilter:search"
-    [post]="p"
-  >
-    <small
-      appStyle="violet"
-      fontWeight="bold"
-      [dStyles]="{textDecoration: 'underline', textTransform: 'uppercase', bg: 'yellow'}"
-      *ngIf="p.text.length > 10; else shortPost"
-    >Long post</small>
-    <ng-template #shortPost>Short post</ng-template>
-  </app-post>
-
   <p>Wait for async... {{prom | async}}</p>
   <p>Date: {{date | async | date:'mediumTime'}}</p>
   <p>Date2: {{date2 | date:'mediumTime'}}</p>
@@ -28,4 +10,12 @@
     <button class="btn" (click)="appCounterService.decrease()">-</button>
     <button class="btn" (click)="appCounterService.increase()">+</button>
   </div>
+  <nav>
+    <ul>
+      <li routerLinkActive="active"><a routerLink="/">home</a></li>
+      <li routerLinkActive="active"><a routerLink="/about">about</a></li>
+      <li routerLinkActive="active"><a routerLink="/posts">posts</a></li>
+    </ul>
+  </nav>
+  <router-outlet></router-outlet>
 </div>

@@ -14,13 +14,6 @@ export interface IPost {
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
-  posts: IPost[] = [
-    {title: 'JS', text: 'Learn JavaScript'},
-    {title: 'Angular', text: 'Learn Angular 9'},
-    {title: 'React Native', text: 'Learn RN'},
-    {title: 'NodeJs', text: 'Learn Node'},
-  ];
-  search = '';
   prom: Promise<string> = new Promise<string>(resolve => {
     setTimeout(() => resolve('promise finish'), 4000);
   });
@@ -42,10 +35,6 @@ export class AppComponent implements OnInit {
     });
 
     stream$.subscribe(val => console.log(val));
-  }
-
-  addPost(post: IPost) {
-    this.posts.unshift(post);
   }
 
   ngOnInit(): void {
