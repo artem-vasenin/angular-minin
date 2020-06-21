@@ -20,6 +20,9 @@ const routes: Routes = [
     path: 'posts/:id',
     component: PostComponent,
     canActivate: [AuthGuard],
+    resolve: {
+      post: PostResolver,
+    }
   },
   {path: 'error', component: ErrorComponent},
   {path: '**', redirectTo: '/error'},
