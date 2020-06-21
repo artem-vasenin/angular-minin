@@ -87,6 +87,28 @@
 - Подобное поведение можно изменить добавив в декоратора компонента параметр:
   encapsulation: ViewEncapsulation.None
 
+Динамические компоненты
+1 - в вызывающем компоненте инжектируем резолвер для фабрики компонентов из @angular/core
+  constructor(private resolver: ComponentFactoryResolver) {}
+2 - далее в методе создающем компонент мы вызываем метод куда передаем создаваемый класс компонента
+  const modalFactory = this.resolver.resolveComponentFactory(ModalComponent)
+3 - чтобы добавлять генерируемый компонент лучше всего создать отдельную директиву
+  @Directive({ selector: '[appRef]' })
+  export class RefDir { constructor(public containerRef: VeiwContainerRef) {} }
+4 - теперь можем использовать ng-template с нашей директивой
+  <ng-template appRef></ng-template>
+5 - получаем доступ до компонента созданного через директиву в родительском компоненте
+  @ViewChild(RefDir, {static: false}) refDir: RefDirective
+  - создаем компонент
+  const component = this.refDir.containerRef.createComponent(modalFactory)
+  - очищаем компонент
+  this.refDir.containerRef.clear()
+  - применяем метод компонента
+  component.instance.close.subscribe(...) // если это эвент эмиттер
+  component.instance.title = "Заголовок" // если это просто свойство
+6 - в родительском модуле мы должны добавить динамически созхдаваемый компонент в
+  поле entryComponents: [ModalComponent]
+
 -----------------------------
 
 Динамические данные
@@ -636,4 +658,4 @@ HTTP Client
 
 
 
-9. Мультистраничность с роутингом / 1
+11. Дополнительные возможности / 2-2:00
