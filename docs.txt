@@ -508,6 +508,77 @@ HTTP Client
   <li routerLinkActive="active"></li> // активный роут получит класс active
   - если нужно точное совпадение роута то ставим директиву:
     [routerLinkActiveOptions]={exact: true} // если true то активныб будет точное совпадение
-  
+
+Программная навигация
+1 - вешаем на клик по кнопке метод, напрмиер goToCart()
+2 - в компоненте в конструктор инжектируем Router из @angular/router
+  constructor(private router: Router) {}
+3 - теперь мы можем пользоваться программной навигацией
+  goToCart() { this.router.navigate(['/cart']); }
+
+Динамические роуты (для деталки)
+1 - создаем роут с динамическим параметром
+  {path: 'posts/:id', component: PostComponent},
+2 - создаем ссылку на детальную информацию к примеру поста
+  <a [routerLink]="['/posts/', p.id]">{{p.title}}</a>
+
+Обработка параметров роута
+1 - инжектируем в наш компонент детальной инфо переменную route типа ActivatedRoute
+  constructor(private route: ActivatedRoute) { }
+2 - далее при инициализации класса мы можем брать параметры из параметра route
+  this.route.params.subscribe((params: Params) => console.log(params.id))
+3 - далее делаем сервис котолрый выбирает или запрашивает пост по его id
+  getPost(id: number) {return this.posts.find(p => p.id === id)}
+4 - инжектируем сервис в класс поста
+  constructor(private service: PostService) { }
+5 - теперь зная id и имея сервис фильтрации получаем пост
+  this.route.params.subscribe((params: Params) => { this.post = this.service.getPost(params.id) })
+
+Работа с query параметрами
+1 - указываем ссылке (или кнопке) какие параметры будем передавать
+  <a [routerLink]="['/posts/', p.id]" [queryParams]="{param: true}">link</a>
+  // /posts/1231/param=true
+2 - получаем на нужной странице параметр в объекте params
+  this.route.params.subscribe((params: Params) => console.log(params.param))
+3 - можно отправлять параметры с помощью программной навигации, для этого сначала
+  инжектируем в конструктор private router: Router и далее пользуемся навигацией
+  goToCart() { this.router.navigate(['/posts', 22], {queryParams: {param: true}}); }
+4 - также можно переходить на якоря (фрагменты) для этого в ссылку добавляем атрбут
+  <a [routerLink]="['/posts/', p.id]" fragment="header">link</a>
+  - в прогамном навигаторе также можно укахать фрагмент в объекте extras
+  goToCart() { this.router.navigate(['/posts', 22], {fragment: 'header'); }
+  - получить значение фрагмента можно в route и его поле fragment
+  this.route.fragment.subscribe(frag => console.log(frag))
+
+Вложенные роуты
+1 - в роутах в родительском роуте указываем параметр children с массивом роутов детей
+  {path: 'about', component: AboutComponent, children: [
+    {path: 'extra', component: AboutExtraComponent},
+  ]},
+2 - делаем ссылку на дочерний роут
+  <a [routerLink]="['/about/', 'extra']">daughter</a>
+3 - в родительском компоненте в шаблоне добавляем место рендеринга дочки
+  <router-outlet></router-outlet>
+
+Редирект и обработка ошибок
+1 - создаем страницу ошибки (компонент)
+2 - создаем роут для страницы ошибки
+  {path: 'error', component: ErrorComponent},
+3 - создаем роут для исключений куда будут попадать не описанные в роутере страницы
+  у него есть особенность. он должен объявляться последним в списке роутов
+  {path: '**', component: redirectTo: '/error'},
+
+Защита страниц
+1 - создаем класс защитник AuthGuard например и имплементируемся от CanActivate
+2 - теперь мы должны создать метод canActivate там короче пздц сложно
+  потом подсмотри как это в auth.guard.ts и в сервисе auth.service.ts
+3 - каждому защищаемому роуту добавляем параметр canActivate с массивом гардов
+  {path: 'posts', component: PostsComponent, canActivate: [AuthGuard]},
+
+Защита дочерних страниц
+1 - в гуарде добавляем имплемент от CanActivateChild
+2 - реализуем метод canActivateChild
+3 - также в дродительском роуте прописываем параметр canActivate Child и передаем массив гуардов
+
 
 9. Мультистраничность с роутингом / 1

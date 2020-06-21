@@ -1,17 +1,8 @@
-<app-post-form (onAdd)="addPost($event)"></app-post-form>
+<app-post-form (onAdd)="postsService.addPost($event)"></app-post-form>
 
 <hr>
 <input type="text" [(ngModel)]="search" placeholder="Search">
 <br>
-<app-post
-  *ngFor="let p of posts | postFilter:search"
-  [post]="p"
->
-  <small
-    appStyle="violet"
-    fontWeight="bold"
-    [dStyles]="{textDecoration: 'underline', textTransform: 'uppercase', bg: 'yellow'}"
-    *ngIf="p.text.length > 10; else shortPost"
-  >Long post</small>
-  <ng-template #shortPost>Short post</ng-template>
-</app-post>
+<div class="posts-list" *ngFor="let p of postsService.getPosts() | postFilter:search">
+  <a [routerLink]="['/posts/', p.id]">{{p.title}}</a>
+</div>

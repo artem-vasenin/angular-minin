@@ -1,6 +1,7 @@
 import {Component, ElementRef, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
-import {IPost} from '../app.component';
+import {IPost} from '../../app.component';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {PostService} from '../../services/post.service';
 
 @Component({
   selector: 'app-post-form',
@@ -9,13 +10,13 @@ import {FormControl, FormGroup, Validators} from '@angular/forms';
 })
 export class PostFormComponent implements OnInit {
   form: FormGroup;
-  title = '';
-  text = '';
 
   @Output() onAdd: EventEmitter<IPost> = new EventEmitter<IPost>();
   @ViewChild('titleInput', {static: false}) titleInputRef: ElementRef;
 
-  constructor() { }
+  constructor(
+    private postService: PostService,
+  ) { }
 
   ngOnInit() {
     this.form = new FormGroup({
@@ -26,19 +27,14 @@ export class PostFormComponent implements OnInit {
   }
 
   addPost() {
-    // if (this.text.trim() && this.title.trim()) {
-    //   const post: IPost = {
-    //     id: Date.now().toString(),
-    //     title: this.title,
-    //     text: this.text,
-    //   };
-    //   this.onAdd.emit(post);
-    //   this.title = this.text = '';
-    // }
     if (this.form.valid) {
-      console.log(this.text.trim() && this.title.trim());
+      this.postService.addPost({
+        title: this.form.value.title,
+        text: this.form.value.text,
+        id: Date.now().toString(),
+      });
     } else {
-      console.log('invalid');
+      console.error('invalid');
     }
   }
 }

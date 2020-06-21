@@ -1,6 +1,9 @@
 import {Component, OnInit} from '@angular/core';
+import {Router} from '@angular/router';
 import {Observable} from 'rxjs';
+
 import {AppCounterService} from './services/app-counter.service';
+import {AuthService} from './services/auth.service';
 
 export interface IPost {
   title: string;
@@ -28,13 +31,19 @@ export class AppComponent implements OnInit {
   date2: Date;
 
   constructor(
-    public appCounterService: AppCounterService
+    public appCounterService: AppCounterService,
+    private router: Router,
+    public authService: AuthService,
   ) {
     const stream$ = new Observable(observer => {
       setTimeout(() => observer.next('finish'), 5000);
     });
 
     stream$.subscribe(val => console.log(val));
+  }
+
+  goToPosts() {
+    this.router.navigate(['/posts']);
   }
 
   ngOnInit(): void {

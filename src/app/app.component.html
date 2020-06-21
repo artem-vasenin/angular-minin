@@ -10,12 +10,16 @@
     <button class="btn" (click)="appCounterService.decrease()">-</button>
     <button class="btn" (click)="appCounterService.increase()">+</button>
   </div>
+  <button class="btn" (click)="goToPosts()">На посты</button>
   <nav>
     <ul>
-      <li routerLinkActive="active"><a routerLink="/">home</a></li>
+      <li routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><a routerLink="/">home</a></li>
       <li routerLinkActive="active"><a routerLink="/about">about</a></li>
+      <li routerLinkActive="active"><a [routerLink]="['/about','extra']">extra</a></li>
       <li routerLinkActive="active"><a routerLink="/posts">posts</a></li>
     </ul>
   </nav>
+  <button class="btn" (click)="authService.login()">Вход</button>
+  <button class="btn" (click)="authService.logout()">Выход</button>
   <router-outlet></router-outlet>
 </div>

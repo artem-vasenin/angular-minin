@@ -5,7 +5,6 @@
         type="text"
         class="form-control"
         placeholder="Title"
-        [(ngModel)]="title"
         formControlName="title"
       >
       <div class="validation" *ngIf="form.get('title').invalid && form.get('title').touched">
@@ -17,7 +16,6 @@
         type="text"
         class="form-control"
         placeholder="Text"
-        [(ngModel)]="text"
         formControlName="text"
       >
       <div class="validation" *ngIf="form.get('text').invalid && form.get('text').touched">
