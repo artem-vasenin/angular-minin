@@ -8,10 +8,8 @@ import {PostComponent} from './posts/post/post.component';
 import {StyleDirective} from './directives/style.directive';
 import {PostFilterPipe} from './pipes/post-filter.pipe';
 import {HomeComponent} from './home/home.component';
-import {AboutComponent} from './about/about.component';
 import {AppRoutingModule} from './app-routing.module';
 import {PostsComponent} from './posts/posts.component';
-import { AboutExtraComponent } from './about/about-extra/about-extra.component';
 import { ErrorComponent } from './error/error.component';
 
 @NgModule({
@@ -22,9 +20,7 @@ import { ErrorComponent } from './error/error.component';
     StyleDirective,
     PostFilterPipe,
     HomeComponent,
-    AboutComponent,
     PostsComponent,
-    AboutExtraComponent,
     ErrorComponent,
   ],
   imports: [
