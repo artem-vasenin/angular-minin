@@ -656,6 +656,18 @@ HTTP Client
   preloadingStrategy: PreloadingAllModules - сначала подкгружается все нобходимое а
   потом уже остальные модули
 
+-----------------------------
 
+SEO. Работа с метатегами
+- Для работы с метатегами необходимо в конструктор главного компонента инжектировать
+  некоторые вещи из @angular/platform-browser:
+  - для работы с title:
+    private title: Title
+    const t = title.getTitle() // получить заголовок
+    title.srtTitle('New title') // устанавливаем заголовок
+  - для работы с мета тегами:
+    private meta: Meta
+    meta.addTags([{name: 'keywords', content: 'angular, js'}]) // устанавливаем метатег
+    
 
 11. Дополнительные возможности / 2-2:00
