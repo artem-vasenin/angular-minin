@@ -681,4 +681,116 @@ PWA
   - в пакеты устанавливаются @angular/pwa и @angular/service-worker
 2 - чтобы сбилдить на продакшин вводим ng build --prod
 
+----------------------------
+
+Анимации
+webAnimationsAPI - анимации на js
+1 - импортируем в модули imports: [BrowserAnimationsModule] из
+  @angular/platform-browser/animations
+2 - если нужны полифилы то идем в src/polyfills.ts и раскомментировав строку
+  import 'web-animations-js' делаем npm i web-animations-js
+3 - в компоненте в декораторе @Component есть массив animations где их описываем
+  импортируя разные функции анимаций из @angular/animations
+  - trigger
+  trigger('box', [ // название триггера (любое)
+    state('start', style({background: 'blue'})), // состояние начала (импорт оттуда же)
+    state('end', style({background: 'red', transform: 'scale(1.2)'})), сост.конца
+  ]),
+4 - далее в классе компонента заводим переменную например boxState = 'start';
+  она будет отвечать за состояние анимации нужного нам элемента
+5 - затем в шаблоне создаем для нужного блока анимацию
+  <div class="box" [@box]="boxState"></div>
+6 - создаем кнопку которая дерганет метод animate который будет менять наш boxState
+7 - для плавных переходов импортируем функции transition и animate применяем их
+  transition('start => end', animate(450)), // переход и время в милисек
+  transition('end => start', animate('800ms ease-in-out')), // обратный переход
+
+Сложные переходы
+  transition('special => *', animate(500)), // переход из special в любое другое
+  transition('* => special', animate(500)), // переход из любого другого в special
+  transition('special <=> *', animate(500)), // двустороннее связывание
+  transition('special <=> *', [ // массив шагов анимации
+    style({background: 'green'}), // будет стартовать с зеленого фона
+    animate('1s', style({background: 'pink'})), // по завершению порозовеет
+    animate(750) // и все это безобразие продолжится 750мс
+  ]),
+
+Появление исчезновение
+1 - в классе создаем переменную состояния visible = true;
+2 - делаем например кнопку которая меняет это состояние
+3 - обычным *ngIf-ом устанавливаем отображение нужного элемента
+4 - создаем в триггере транзишн
+  transition('void => *', [ // если пусто (не иф)
+    style({opacity: 0}),
+    animate('850ms easy')
+  ]),
+  transition('* => void', [ // если надо убрать
+    style({opacity: 1}),
+    animate('850ms easy', style({opacity: 0, transform: 'scale(1.2)'}))
+  ]),
+  - можно заменить 'void => *' на ':enter' а '* => void' на ':leave'
+
+Группировка анимаций
+- для запуска сгруппированных анимаций импортируем group и применяем в transition
+  group([
+    animate('850ms easy', style({opacity: 0, transform: 'scale(1.2)'})),
+    animate('850ms easy', style({color: 'red', fontWeight: 'bold'}))
+  ])
+
+Доступ до дочерних элементов
+- если в анимируемом элементе есть дочерние компоненты, то для доступа к ним
+  импортируем метод query. По умолчанию запустятся анимации последовательно
+  query('h4', animate(1500, style({fontSize: '30px'})))
+- если нужен тпаралельный запуск то также группируем это через group
+
+Шаги анимации
+1 - импортируем метод keyframes
+2 - в триггере в транзишне создаем анимацию с заданным временем и вторым параметром
+  передаем метод keyframes куда мы передаем массив стилей в методе style/
+  По умолчанию keyframes берет время анимации и делит на шаги добавления стилей
+  transition('void => *', [
+    animate('4s', keyframes([
+      style({background: 'red'}),
+      style({background: 'blue'}),
+      style({background: 'orange'}),
+      style({background: 'yellow'}),
+    ]))
+  ]),
+  - но мы можем управлять распределением времени анимацией
+  animate('4s', keyframes([
+    style({background: 'red', offset: 0}), // стартовое время
+    style({background: 'blue', offset: 0.2}), // за 20%
+    style({background: 'orange', offset: 0.4}), // за 40%
+    style({background: 'yellow', offset: 1}), // до конца
+  ]))
+
+События анимации - мы можем прослушивать события происходящие в нашем триггере
+1 - добавляем эвент эмиттер на блок анимации (start, done)
+  <div class="box" [@box]="boxState" (@box.start)="onStarted($event)"></div>
+2 - реализуем метод принимая переданный эвент с типом AnimationEvent
+  onStarted(e: AnimationEvent) { console.log(e) } // с этими данными можно работать
+
+Библиотека ng-animate - готовая библиотека анимаций https://www.npmjs.com/package/ng-animate
+1 - npm install ng-animate --save
+2 - импортируем компоненты из @angular/animations с хуком useAnimation
+  import { trigger, transition, useAnimation } from '@angular/animations';
+3 - импортируем нужную нам стилевую анимацию вместо того чтобы руками ее писать
+  import { bounce } from 'ng-animate';
+4 - применяем анимацию а транзишне
+  animations: [trigger('bounce', [transition('* => *', useAnimation(bounce))])],
+  <div [@bounce]="bounce"></div>
+  - в анимации можно передавать параметры
+  animations: [
+    trigger('bounce', [transition('* => *', useAnimation(bounce, {
+      params: { timing: 5, delay: 2 } // время выполнения и задержка
+    }))])
+  ],
+
+Внешнее хранение анимаций
+- для улучшения читаемости кода лучше выносить анимации в отдельный файл
+  например app.animations.ts откуда будем их экспортировать
+  export const boxAnimation = trigger(.......);
+  а в компоненте в моассив анимаций просто получить эту анимацию
+  animations: [boxAnimation]
+
 11. Дополнительные возможности / 2-2:00
