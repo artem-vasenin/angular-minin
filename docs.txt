@@ -793,4 +793,49 @@ webAnimationsAPI - анимации на js
   а в компоненте в моассив анимаций просто получить эту анимацию
   animations: [boxAnimation]
 
+-------------------------
+
+Typescript
+
+Базовые типы
+const str: string = 'string'; // строковый тип
+const num: number = 22; // числовой тип
+const bool: boolean = true; // булев тип
+const arr: string[] = ['d', 'f']; // массив строк
+const arr: Array<number> = [1, 2, 3]; // массив чисел (вариант записи)
+
+function info(name: string, age: number): void { console.log('info', name, age); }
+function info(a: number, b: number): number { return a + b; }
+
+Классы
+private myVar - если хотим сделать свойство доступным только в этом классе
+public myVar - если хотим сделать свойство доступным везде
+protected myVar - свойство доступно только в этом классе и в дочерних классах
+
+- можем делать такие же приватные, публичные защищенные методы
+- получение значений из конструктора в переменные:
+  public name: string;
+  protected ip: number;
+  constructor(name: string, ip: number) { this.name = name; this.ip = ip}
+- упрощённая запись:
+  constructor(public name: string, protected ip: number) {}
+
+Интерфейсы и объекты
+- чтобы описать объект воспользуемся interface
+  interface IUser {
+    name: string; // обязательно поле строка
+    age?: number; // необязательное поле номер
+    logInfo: () => void // фукция ничего не возвращающая
+  }
+
+Интерфейсы и классы
+interface SayHello {
+  sayHello: () => void; // функция которую мы будем обязаны реализовать в классе
+}
+class User implements SayHello {...} // будет ошибка если не объявим метод sayHello
+
+Дженерики типы
+const arr: number[] = [1, 2, 3];
+const arr: Array<number> = [1, 2, 3]; // тип массив с наполнением числами
+
 11. Дополнительные возможности / 2-2:00
