@@ -1,0 +1,841 @@
+1 -  npm install -g @angular/cli устанавливаем ангулар кли глобально
+2 - ng new my-first-project генерируем наш проект
+
+Компоненты - ручной режим
+1 - создаем каталог для компонента (например post)
+2 - создаем файл компонента post.component.ts (главный файл)
+  - импортируем Component декоратор из @angular/core
+  - всё является классами поэтому экспортируем класс PostComponent
+  - объявляем декоратор @Component для нашего класса и передаем туда объект опций:
+    - selector: 'app-post'
+    - templateUrl: './post.component.html'
+  - нам ts подсказывает что наш компонент не объявлен в app.module. Объявляем его в declarations
+  - теперь мы можем вывести наш компонент в шаблоне app.component.html тегом <app-post></app-post>
+3 - создаем файл шаблона компонента post.component.html
+4 - (не обязательно) создаем файл стилей компонента post.component.scss
+  - подключаем стили в post.component.ts в декораторе @Component передавая в параметры:
+    - styleUrls: ['./post.component.scss'],
+
+Компоненты - cli
+1 - ng g(generate) c(component) post --skipTests
+  - ангулар автоматически создает и импортирует компонент и сбрасывает тесты
+
+Свои настройки компонента
+- вместо templateUrl в декоратор @Component можно передать свойство template
+  куда передать разметку ввиде строки `<div>Component</div>`
+- также можно передавать стили в свойство style и передать туда массив строк
+  [`.post4 {padding: 5rem;}`]
+
+Передача параметров в компоненты
+- для передачи параметров в компонент используем одностороннюю связку куда передаем данные
+  <app-post [post]="post"></app-post>
+- чтобы принять данные в компоненте необходимо создать в классе компонента переменную и применить к ней
+  декоратор @Input который импонтируется из @angular/core
+   @Input() post; обозначаем что будет передан параметр
+- далее выводим в шаблоне в интерполяции поля данного параметра {{post.title}}
+- можно переопределять название ожидаемого принимаего параметра в компоненте
+  <app-post [MyPost]="item"></app-post>
+  @Input('MyPost') post; таким образом переменная post получит значение параметра MyPost
+  иначе если не передаем в декоратор никаких параметров он будет ждать переменную с именем параметра
+
+Передача дочерних элементов в компонент
+- Можно писать компонент не как пустой тег а как тег обертку для контента
+  <app-post [post]="p"><small *ngIf="p.text.length > 10">Long post</small></app-post>
+- получить в компоненте дочерние элементы можно с помощью специального тега <ng-content></ng-content>
+  <div class="card"><ng-content></ng-content></div>
+- если нам надо будет иметь доступ до дочерних элементов в компоненте обертке то даем ему референцию
+  <app-post [post]="p"><small #longPost>Long post</small></app-post>
+- затем внутри компонента обертки получаем доступ используя декоратор @ContentChild
+  @ContentChild('longPost', {static: true}) longPostRef: ElementRef;
+  Тут установили static: true так как к примеру хотим использовать элемент в ngOnInit
+
+Передача параметров из компонента
+- обязательно импортируем FormsModule из @angular/forms в app.module
+  imports: [FormsModule]
+- в классе где задействована форма и надо передать данные в родительский компонент (emit) импортируем
+  декоратор @Output из @angular/core и указываем название метода отдаваемого наружу
+  @Output() onAdd: EventEmitter<IPost> = new EventEmitter<IPost>();
+- далее там же в классе применяем этот метод в нужный момент (создание поста к примеру)
+  this.onAdd.emit(post); метод emit добавляет декоратор @Output
+- далее в родительском компоненте где объявляем наш дочерний компонент добавляем прослушку события onAdd
+  <app-post-form (onAdd)="addPost($event)"></app-post-form>
+- там же в родителе в классе создаем метод для работы с переданными от потомка данными
+  addPost(post: IPost) {...} куда получаем эвент и им распоряжаемся
+
+Жизненный цикл компонентов https://angular.io/guide/lifecycle-hooks
+- implements для тайпскрипта, работает и без него
+- constructor - не хук но отрабатывает первым до хуков
+1 - ngOnChanges - при изменении параметров, возвращает текущее и предыдущее значение параметров (до инициализации)
+  ngOnChanges(changes: SimpleChanges): void
+2 - ngOnInit - инициализация компонента
+3 - ngDoCheck - начало действий во время изменений, делаются проверки, вызывается при каждом изменении
+4 - ngAfterContentInit - вызывается при инициализации дочернего контента (внутри компонента обертки)
+5 - ngAfterContentChecked - вызывается когда весь передаваемый контент готов для использования
+6 - ngAfterViewInit - вызывается при инициализации элементов компонента
+7 - ngAfterViewChecked - вызывается при проверке элементов компонента
+8 - ngOnDestroy - вызывается при уничтожении компонента
+
+Стратегия изменений компонента
+- Компоненту можно задавать стратегию отслеживания изменений. Задается это в декораторе @Component
+  changeDetection: ChangeDetectionStrategy.Default - по умолчанию
+  По умолчанию отслеживается каждое изменение элементов и происходит перерисовка
+- Можно задать стратегию .OnPush и тогда ангулар будет реагировать только на входные свойства @Input
+
+Стили с ViewEncapsulation
+- Стили объявленные внутри стилевого файла компонента доступны только для данного компонента так как к ним
+  добавляется дата параметр к которому стиль привязывается
+- Подобное поведение можно изменить добавив в декоратора компонента параметр:
+  encapsulation: ViewEncapsulation.None
+
+Динамические компоненты
+1 - в вызывающем компоненте инжектируем резолвер для фабрики компонентов из @angular/core
+  constructor(private resolver: ComponentFactoryResolver) {}
+2 - далее в методе создающем компонент мы вызываем метод куда передаем создаваемый класс компонента
+  const modalFactory = this.resolver.resolveComponentFactory(ModalComponent)
+3 - чтобы добавлять генерируемый компонент лучше всего создать отдельную директиву
+  @Directive({ selector: '[appRef]' })
+  export class RefDir { constructor(public containerRef: VeiwContainerRef) {} }
+4 - теперь можем использовать ng-template с нашей директивой
+  <ng-template appRef></ng-template>
+5 - получаем доступ до компонента созданного через директиву в родительском компоненте
+  @ViewChild(RefDir, {static: false}) refDir: RefDirective
+  - создаем компонент
+  const component = this.refDir.containerRef.createComponent(modalFactory)
+  - очищаем компонент
+  this.refDir.containerRef.clear()
+  - применяем метод компонента
+  component.instance.close.subscribe(...) // если это эвент эмиттер
+  component.instance.title = "Заголовок" // если это просто свойство
+6 - в родительском модуле мы должны добавить динамически созхдаваемый компонент в
+  поле entryComponents: [ModalComponent]
+
+-----------------------------
+
+Динамические данные
+1 - динамика заводится внутри классов, создаем переменную в классе:
+  - title = 'Post component';
+2 - выводим переменные в шаблоне с помощью интерполяции {{}} - для примитивов
+  - <h1>{{title}}</h1>
+3 - можно выполнять простые взаимодействия которые можно привести к строке
+  - {{2+1}} // 3, {{'string' + ' js'}} // string js, {{[1,2,3]}} // 1,2,3
+
+-----------------------------
+
+Binding - привязка данных
+1 - для односторонней связки html с ts оборачиваем свойство в [] скобки. Например <img [src]='img'/>
+  и передаем туда переменную
+2 - для event binding односторонней связки ts с html оборачиваем события в () скобки, указываем метод и передаем event
+  <input type="text" (keyup.enter)="onInput($event)">
+  onInput(e: KeyboardEvent) {this.val = (<HTMLInputElement>e.target).value}
+3 - создаем локальную ссылку для элемента и далее получаем к нему доступ и можем передать эвент таким образом
+  <input (blur)="onBlur(myInput.value)" #myInput>
+  onBlur(str: string) {this.val = str}
+4 - way binding двухстороннее связывание ts с html
+  - создаем переменную с каким то начальным значением например value и байндим в элемент
+    <input type="text" [value]="value">
+  - добавляем байндинг события
+    <input type="text" [value]="value" (input)="onInput($event)">
+5 - связывание с помощью ngModel
+  - импортируем в модуль (app.module.ts например) FormsModule
+  - <input type="text" [(ngModel)]="value"> теперь value меняется при динамическом вводе текста
+6 - если функция состоит из одной строки то можно ее объявить прямо в эвенте
+  - <button (click)="imgStyles = {width: '300px', height: '300px'}">big</button>
+
+------------------------------
+
+Директивы - вспомогательные атрибуты для управления хтмл элепентов и компонентов (атрибутные и структурные)
+1 - ngStyle
+  - при добавлении к элементу мы байндим ngStyle
+    <div [ngStyle]="{width: '200px', borderRadius: '5px'}"></div>
+2 - ngClass
+  - <div [ngClass]="{active: title === 'active', hidden: !title}"></div>
+  - <div [class.active]="title === 'active'" [class.hidden]="!title"></div>
+3 - ngIf else - структурные
+  - <div *ngIf="title === 'active'"></div> - одно условие
+  - <div *ngIf="title === 'active'; else emptyText"></div> - условие с иначе
+    <ng-template><div #emptyText>Пусто</div></ng-template> - контейнер для иначе
+4 - ngSwitch
+  - <div [ngSwitch]="title">
+      <p *ngSwitchCase="'active'">case 1</p>
+      <p *ngSwitchCase="'not active'">case 2</p>
+      <p *ngSwitchDefault>case 3</p>
+    </div>
+5 - ngFor
+  - <p *ngFor="let item of arrItems">{{item}}</p>
+  - <p *ngFor="let item of arrItems; let idx = index">{{idx}}-{{item}}</p> - итерация с индексом
+
+Создание своих директив
+1 - Создаем файл для директивы myDir.directive.ts и экспортируем класс
+  StyleDirective к которому применяем декоратор @Directive
+2 - В декоратор передаем объект с параметром selector и присваеваем ему
+  значение имени директивы selector: '[myDir]' в скобках
+3 - Импортируем директиву в модуле в массиве declarations
+4 - ng g d directives/myDir --skipTests - автоматическая генерация директивы
+5 - Чтобы получить доступ до элемента который вызвал директиву делаем инъекцию
+  constructor(private elRef: ElementRef) {elRef.nativeElement.style.color = 'green';}
+  и описываем нужное нам изменение объекта, это будет работать в вебе но...
+  - для универсальности работы с мобилками надо подключить Renderer2 из @angular/core
+  constructor(private elRef: ElementRef, private renderer: Renderer2) {
+    this.renderer.setStyle(this.elRef.nativeElement, 'color', 'green');
+  }
+6 - Затем применяем директиву в шаблоне <span myDir>Some text</span>
+
+Добавление событий
+- добавляем декоратор @HostListener куда передаем имя события, эвент и метод который отработает
+  @HostListener('click', ['$event']) onClick(event: Event) {
+    this.elRef.nativeElement.style.color = 'red'; } // и при клике сменится цвет
+
+Передача параметров в директиву
+- если мы хотим передавать в директиву какие то параметры <span myDir="red">Some text</span> то
+- необходимо импортировать в директиву декоратор @Input и применить его на входящие параметры
+  @Input('appStyle') color: string = 'orange'; // по умолчанию оранж, это вариант получения
+  this.renderer.setStyle(this.elRef.nativeElement, 'color', this.color); // в хостЛистенере пишем наше свойство цвета
+- также можно используя директиву на элементе передавать ему и другие параметры и принять их в директиве
+  <span myDir="red" fontWeight="bold">Some text</span>
+  @Input('appStyle') fontWeight: string = 'normal';
+  this.renderer.setStyle(this.elRef.nativeElement, 'fontWeight', this.fontWeight); // добавляем стиль
+- можно передать мобъект стилей а не поштучно, тогда свойство надо забайндить
+  [dStyles]="{textDecoration: 'underline', textTransform: 'uppercase'}"
+  @Input() dStyles: {textDecoration?: string, textTransform?: string}; // разрешаем некоторые стили
+
+Декоратор @HostBinding
+- можно добавлять стили без референции элемента, просто применяем декоратор @HostBinding
+  @HostBinding('style.backgroundColor') bg = null;
+- и далее просто меняем значение переменной bg передавая туда данные из свойств
+  this.bg = this.dStyles.bg;
+
+Структурные директивы
+- звездочка перед структурной директивой лишь обозначает что элемент будет завернут в ng-template а само
+  условие например будет передано именно в него типа данного примера:
+  <p *ngIf="show">some</p> поменяется на такой вид:
+  <ng-template [ngIf]="show"><p>some</p></ng-template>
+1 - создаем свою структурную директиву: ng g d ifnot --skipTests
+2 - инжектируем в конструктор директивы из @angular/core две сущности:
+  constructor(private templateRef: TemplateRef<any>, private viewContainer: ViewContainerRef){...}
+  - TemplateRef - указывает на содержимое будущего ng-template (элементы подвергаемые условию)
+  - ViewContainerRef - указывает на сам контейнер ng-template куда завернётся содержимое
+3 - принимаем с помощью декоратора @Input параметром метод который примет в свою очередь параметр,
+  который мы передадим в директиву (условие)
+  @Input() set ifNot(condition: boolean) { condition
+    ? this.viewContainer.createEmbeddedView(this.templateRef) // если попали, то заварачиваем в контейнер
+    : this.viewContainer.clear()} // если не папали то очищаем контейнер
+
+------------------------------
+
+Пайпы - трансформеры для изменения отображения данных https://angular.io/api?type=pipe
+Встроенные пайпы (сущности модуля BrowserModule поэтому они импортируются вместе с ним)
+1 - Работа с числами (Math.E) // 2.718281828459045
+  {{Math.E | number}} // 2.718
+  {{Math.E | number:'3.1-5' }} // 002.71828 - 1 цифра это числа до запятой, 2 значение диап от 1 до 5 с округл
+  {{Math.E | number:'1.0-0' }} //3 - 1 цифра до запятой и без дробных чисел потому округляется до 3-х
+2 - Работа со строками
+  {{'hello' | uppercase | lowercase}} // сначала в HELLO а потом hello приведет в нижний регистр
+  {{'hello' | titlecase | slice:1:3}} // сначала Hello а потом ell так как вырежим со 2 по 4 буквы
+3 - Работа с датой (date = new Date()) // Tue Jun 09 2020 14:57:13 GMT+0300 (Москва, стандартное время)
+  https://angular.io/api/common/DatePipe - слишком дохера настреок
+  {{ value_expression | date [ : format [ : timezone [ : locale ] ] ] }}
+  value_expression - наша дата
+  date - сам пайп а далее разные параметры к нему которые можно передавать
+  {{date | date}} // Jun 9, 2020
+  {{date | date:'fullDate'}} // Tuesday, June 9, 2020 эквивалент
+  {{date | date:'EEEE, MMMM d, y'}} // Tuesday, June 9, 2020
+4 - Ещё
+  {{0.42 | currency}} // $0.42
+  {{0.42 | percent}} // 0.42% (можно с параметрами свойственными number)
+  {{{a: 1, b: {c: 3}} | json}} // {'a': 1, 'b': {'c': 3}}
+
+Создание пайпов вручную
+1 - создаем файл my-pipe.pipe.ts и экспортируем класс пайпа и применяем к нему декоратор @Pipe
+  @Pipe({name: 'mypipe'})
+2 - регистрируем пайп в модуле в поле declarations
+3 - имплементируемся от интерфейса PipeTransform который обязует реализовать метод transform
+  transform(value: any, ...args: any): any {...} - принимает и трансформирует полученные данные
+4 - ng g p my-mult --skipTests автоматическая генерация
+
+Оптимизация пайпов
+У пайпов по умолчанию есть параметра pure который говорит чтобы пайп отрабатыввал если изменилось что то во
+входящем значении в метод трансформ. Это можно изменить добавив в декоратор @Pipe свойство pure: false
+
+Асинхронные пайпы
+- Если у нас есть асинхронные данные возвращаемые промисом, мы можем использовать пайп async который
+вернет данные которые мы передаём в метод resolve отработоашего промиса
+  prom: Promise<string> = new Promise<string>(resolve => {
+      setTimeout(() => resolve('promise finish'), 4000);
+    });
+  <p>Wait for async... {{prom | async}}</p> // Wait for async... и через 4с promise finish
+- Также если у нас есть Observable данные которые требуют подписки на стрим мы можем вернуть данные
+  с помощью пайпа async
+  date: Observable<Date> = new Observable<Date>(obs => {
+    setInterval(() => obs.next(new Date()), 1000);
+  });
+  <p>Date: {{date | async | date:'mediumTime'}}</p>
+
+------------------------------
+
+Референции
+- Для доступа к любому элементу необходимо задать элементу референцию с помощью #
+  <input type="text" #myInput>
+- в классе компонента импортируем декоратор @ViewChild и применяем его к переменной куда сложим референцию
+  @ViewChild('titleInput', {static: false}) titleInputRef: ElementRef;
+- первым параметром в декоратор передадим имя референции,
+  вторым объект со значением static: false (если хотим обратиться в ngOnInit хуке то передаем true до 9 версии)
+- применяем нашу референцию например для получения фокуса на элементе при нажатии кнопки
+  setFocus() { this.titleInputRef.nativeElement.focus(); }
+  доступ идет через nativeElement, делается это для универсальности (мы работаем еще и с мобилками)
+
+------------------------------
+
+RxJs - библиотека для работы с разными типами данных, событий, объектов и т.д. Удобно работает с асинхронными
+данными. Удобно тем, что можно данные обернуть в стрим и в другом месте на них подписаться
+- Импорты берутся из 2 библиотек. Из rxjs и rxjs/operators
+  rxjs - для элементов создающих новые стримы
+  rxjs/operators - относится к операторам
+- const intervalStream$ = interval(1000) - вернет стрим объект (реактивные переменные помечаем $)
+  который содержит метод subscribe принимающий в себя КБ ф-цию которая принимает некоторое значение
+- с помощью subscribe мы можем подписываться на изменения происходящие в стриме и взаимодействовать с ними
+
+Оптимизация стримов
+- подписки на стримы необходимо прекращать для предотвращения утечки памяти
+- для этого создаем переменную напрмиер sub: Subscription и в нее записываем результат работы subscribe
+  sub: Subscription - переменная будет отвечать за подписку
+  this.sub = intervalStreams$.subscribe(val => console.log(val))
+  stop() {this.sub.unsubscribe()} - теперь мы можем отписаться от подписки на событие в каком либо методе
+
+Операторы RxJS https://rxjs-dev.firebaseapp.com/guide/operators
+- у стримов имеется метод pipe позволяющий применять операторы и их множество
+- import {map, filter} from 'rxjs/operators' импортируем пару операторов
+- теперь в pipe передаем эти операторы
+  this.sub = intervalStreams$
+    .pipe(
+      filter(val => val % 2 === 0), - по приколу фильтруем четные значения (методы через запятую применяем)
+      map(val => `maped value: ${val}`), - по приколу преобразуем значение в строку
+    )
+    .subscribe(val => console.log(val))
+
+Создание своего стрима
+1 - import {Observable} from 'rxjs' - импортируем класс обсервер.
+2 - создаем стрим как экземпляр класса Observable конструктор которого принимает КБ с параметром observer
+  const stream$ = new Observable(observer => { setTimeout(() => observer.next('finish'), 5000); });
+3 - теперь мы можем подписаться на созданный стрим
+  this.sub = stream$.subscribe(val => console.log(val));
+4 - мы можем выбросить ошибку при каких то условиях
+  const stream$ = new Observable(observer => { setTimeout(() => observer.error('WRONG'), 2000); });
+5 - мы можем завершить стрим вызовом метода complete
+  const stream$ = new Observable(observer => { setTimeout(() => observer.complete(), 1000); });
+6 - метод subscribe принимает 3 КБ
+  this.sub = stream$.subscribe(
+    val => console.log(val), // если все пошло как надо (обязательная)
+    err => console.error(err), // если все пошло не так
+    () => console.info('complete'), // если принудительно завершили (если не было никаких ошибок!)
+  );
+
+- метод next в обсервере равносилен методу resolve в промисе. Говорит об успехе
+- метод error в обсервере равносилен reject в промисе и говорит о неудаче (прекращает работу стрима)
+
+Subject - класс позволяющий осоздавать стримы, тут мы можем не только подписываться но и эмитить события
+1 - import {Subject} from 'rxjs'
+2 - stream$: Subject<void> = new Subject<void>; // создаем стрим с пустыми типами данных
+3 - this.sub = stream$.subscribe(val => console.log(val)); // подписываемся на стрим
+4 - создаем к примеру кнопку дёргающую метод next
+  <button (click)="next()">Next</button>
+5 - создаем метод для работы с событием кнопки где дергаем метод next для обсервера
+  next() {this.sub.next()}
+
+------------------------------------
+
+Сервисы - отдельные классы позволяющие работать с данными
+
+Создание сервиса
+1 - создаем файл сервиса и экпортируем класс сервиса (можно без декораторов) и пишем там нужные методы
+2 - регистрируем созданный сервис (можно несколькими способами)
+  - providers [AppCounterService] - для сервисов в корневом компоненте
+  - providers [AppCounterService] в любом компоненте, если в сервисе не передан {providedIn: 'root'}
+3 - далее инжектируем сервис в конструкторе нужного компонента где будем его использовать
+  constructor(private appCounterService: AppCounterService) {...}
+4 - после этого мы можем использовать данный сервис в шаблоне компонента
+
+Создание через генератор
+- ng g s services/local-counter --skipTests
+
+@Injectable - рекомендуется добавлять к сервисам, с его помощью мы можем инжектировать сервисы в сервисы
+- в декататор можно передавать объект со свойством providedIn: 'root', что автоматически регистрирует сервис
+  @Injectable({providedIn: 'root'}) - автоматом подключает в корневом провайдере (с 6 версии ангулара)
+
+Область видимости сервиса
+Если регистрируем сервис в корневом компоненте, то он доступен у всех потомков импортируемых в корневой
+компонент. Но если сервис регистрировать в каком либо дочернем компоненте то этот сервис копируется
+и доступен только у данного компонента и его потомков
+
+Связь сервисов.
+1 - создаем новый глобальный сервис
+2 - благодаря @Injectable в любом сервисе мы инжектируем в конструкторе сервиса этот новый сервис
+3 - используем новый сервис внутри наших методов как в любом другом месте
+
+--------------------------------------
+
+Формы и валидация
+1 - импортируем в app.module.ts модуль ReactiveFormsModule и FormsModule
+2 - в компоненте создаем переменную для формы form: FormGroup из @angular/forms
+3 - инициализируем форму например в ngOnInit
+  this.form = new FormGroup({}); - конструктор принимает объект с контролсами
+4 - сваязываем в шаблоне форму с объектом формГрупп
+  <form class="card" [formGroup]="form">
+5 - даем кнопкам типы button если их не надо слушать и главной даем type="submit"
+6 - байндим к форме событие ngSubmit к нашему методу делающему отправку формы
+  <form class="card" [formGroup]="form" (ngSubmit)="addPost()">
+7 - поля формы добавляем в объект формы с помощью класса FormControl, в конструктор класса мы передаем
+  начальное значение поля и набор валидаторов для него
+  this.form = new FormGroup({ title: new FormControl('') });
+8 - для связки шаблона формы с ts значениями необходимо добавить свойство formControlName к полям формы
+  <input type="text" [(ngModel)]="title" formControlName="title">
+  - теперь после отправки формы наши поля доступны в объекте this.form.value
+9 - можно создавать группы контролов, чтобы при заполнении они вносились в разные поля одного объекта.
+  напиример у нас есть селект с странами и инпут для ручного ввода города, заносим их в одну группу контролов:
+  address: new FormGroup({ country: new FormControl(''), city: new FormControl('') })
+  - затем в шаблоне оборачиваем группу полей в элемент с параметром formGroupName="address"
+    и даем нашим полям обычные параметры formControlName="country" и для города city
+  - теперь если заполнить поля то они соберутся в поле address (объект) с полями country и city
+  - добраться до поля в группе можно таким образом:
+    this.form.get('address').get('country').value - если нам нужно значение
+10 - если необходимо подгрузить в форму данные (о пользователе например) по запросу к серверу, то
+  надо использовать метод patchValue для нужного поля, к примеру обновляем поле города
+  this.form.pathValue({address: {city: newValueFromServer}})
+11 - Очистка формы производится методом this.form.reset()
+
+Валидация
+1 - Импортируем класс Validators из @angular/forms
+2 - подключаем валидаторы в FormControl нашей формы (их куча)
+  this.form = new FormGroup({ title: new FormControl('', Validators.required) });
+  this.form = new FormGroup({ title: new FormControl('', [Validators.required, Validators.email]) });
+3 - теперь можно првоерять состояние формы на валидность и дизейблить отправку например
+  <button class="btn" type="submit" [disabled]=form.invalid>Add Post</button>
+4 - также валидатор автоматически добавляет к применяемым полям классы состояний, такие как
+  ng-invalid ng-touched ng-untouched ng-valid ng-dirty и на них можно навесить стили
+5 - для вывода ошибок в форме используем метод form.get('имя поля') для доступу к полю и его состоянию
+  <div class="validation" *ngIf="form.get('title').invalid && form.get('title').touched">
+    <small *ngIf="form.get('text').errors.required">Поле не может быть пустым</small>
+  </div>
+- чтобы не запоминать то как проверять ошибки можно просто делать дебаг в коде:
+  <pre>{{form.get('text').errors | json}}</pre>
+
+Создание собственных валидаций
+1 - Создаем новый класс валидатор напрмиер my.validators.ts и экспортируем его
+2 - создаем статическую ф-цию валидатор принимающую параметр control: FormControl
+3 - возвращать будет тип {[key: string]: boolean} а по умолчанию возвращаем null - значит валидно
+  static myValidateEmail(control: FormControl): {[key: string]: boolean} {
+    if (['v@v.v'].includes(value)) { return {'restrictEmail': true} }
+    return null;
+  }
+  - добавляем наш валидатор к контролу
+  this.form = new FormGroup({ email: new FormControl('', MyValidators.myValidateEmail) });
+4 - создаем асинхронный валидатор
+  static uniqEmail(control: FormControl): Promise<{[key: string]: boolean}> | Observable<{[key: string]: boolean}> {
+      if (['v@v.v'].includes(value)) { return {'restrictEmail': true} }
+      return new Promise(resolve => {
+        setTimeout(() => {
+          if (value === '....') resolve({ uniqEmail: true });
+          else resolve(null);
+        }, 1000);
+      });
+    }
+  - добавляем наш валидатор к контролу третьим параметром после синхронного валидатора
+    this.form = new FormGroup({ email: new FormControl('', MyValidators.myValidateEmail, MyValidators.uniqEmail) });
+  - при асинхронной проверке к полю добавляется класс ng-pending
+
+----------------------------------------
+
+HTTP Client
+1 - импортируем в корневой модуль приложения пакет HttpClientModule из @angular/common/http (в импортс)
+2 - инжектируем модуль в компонент в конструкторе
+  constructor(private http: HttpClient) {...}
+3 - теперь мы можем обращаться к http в компоненте. HttpClient заточен под RxJS поэтому он оборачивается
+  в стрим на который надо подписаться чтобы увидеть результат работы модуля
+  this.http.get('http://...').subscribe(response => console.log(response));
+4 - работа методом post. Особенность что вторым параметром ожидается объект данных
+  this.http.get('http://...', payload).subscribe(response => console.log(response));
+
+Обработка ошибок
+- метод subscribe принимает в себя не 1 а 3 колбэка
+  1 - вызывается когда успех и мы получаем какие то данные
+  2 - сторой принимает в себя ошибку если такая есть
+  3 - третий с пустыми параметрами вызывается по завершении стрима
+  this.http.get('http://...').subscribe(res => console.log(res), err => console.error(err));
+- также при работе с rxjs мы можем работать с ошибками в pipe
+  .pipe(catchError(err => {console.error(err); return throwError(err);}))
+  catchError импортируем из rxjs/operators, throwError импортаруем из rxjs
+
+Добавление опций
+- добавление headers
+  this.http.post(url, data, { - третьим параметром (или вторым для get) передаём опшинс
+    headers: new HttpHeaders({'Content': 'text/json'}) добавления хедеров
+    params: new HttpParams().set('_limit', '3') добавление параметра
+  })
+- добавление параметров
+  this.http.post(url, data, {
+    params: new HttpParams().set('_limit', '3') добавление параметра
+  })
+  альтернативная запись для объявления нескольких параметров:
+  let params = new HttpParams();
+  params = params.append('_limit', '5');
+  params = params.append('custom', 'something');
+  this.http.post(url, data, { params })
+- observe - указываем какой тип данных хотим получить в ответе (events, response - default, body)
+  this.http.post(url, data, { observe: 'response' }) но надо поменять тип на другой (11видео 2:30)
+  1 - body - получаем доступ до всех опций
+  2 - events - получаем доступ до всех событий
+- responseType (arraybuffer, blob, json - default, text) - как надо парсить ответ сервера
+
+Перехват интерсепторами запросов
+1 - создаем класс AuthInterceptor и экспортируем его в файле auth.interceptor.ts
+2 - имплементируемся от класса HttpInterceptor из @angular/common/http
+3 - регистрируем интерсептор в провайдерс модуля
+  const InterceptorProvider: Provider = { // имп.тип из @angular/core
+    provide: HTTP_INTERCEPTORS, // импортируем константу из @angular/common/http
+    useClass: AuthInterceptor, // имп. наш класс интерсептор
+    multi: true // если будет несколько интерсепторов то они будут добавляться а не затираться
+  }
+  - регистрируем интерсепт провайдер в провайдерсах модуля app.module.ts
+  providers: [InterceptorProvider]
+4 - реализуем обязательный метод intercept
+  - первый параметр request
+  - второй это next
+  intercept(req: HttpRequest<any>, next: HttpHeader): Observable<HttpEvent<any>> {
+    const cloned = rec.clone({  // клонируем реквест
+      headers: req.headers.append('Auth': 'Token') // модифицируем реквесты добавляя каждому аутх токен
+    });
+    return next.handle(req); // обязательно к возврату (является стримом поэтому можем юзать пайпы)
+  }
+
+-------------------------------------
+
+Роутинг
+1 - создаем модуль app-routing.module.ts
+  - импортируем @NgModule из @angular/core
+  - применяем декоратор и передаем туда опции:
+    * прописываем импорты для роутера imports: [RouterModule] из @angular/router
+    * прописываем экспорт exports: [RouterModule]
+2 - импортируем наш роутер модуль в модулях корневого app
+  imports: [AppRoutingModule]
+3 - создаем в классе роутера начальное состояние
+  роутера const routes: Routes = [];
+  - передаем переменную в параметра декоратора @NgModule проутера в методе forRoot
+    imports: [RouterModule.forRoot(routes)],
+4 - регистрируем роуты в константе routes
+  const routes: Routes = [{path: '', component: HomeComponent}];
+5 - добавляем на страницу где будут отрисовываться страницы роутера тег
+  <router-outlet></router-outlet>
+6 - в ссылках меню вместо href добавляем атрибут routerLink="/about" или так:
+  [routerLink]="['/about']"
+  - актуальный роут можно проверить директивой routerLinkActive и добавить ему класс
+  <li routerLinkActive="active"></li> // активный роут получит класс active
+  - если нужно точное совпадение роута то ставим директиву:
+    [routerLinkActiveOptions]={exact: true} // если true то активныб будет точное совпадение
+
+Программная навигация
+1 - вешаем на клик по кнопке метод, напрмиер goToCart()
+2 - в компоненте в конструктор инжектируем Router из @angular/router
+  constructor(private router: Router) {}
+3 - теперь мы можем пользоваться программной навигацией
+  goToCart() { this.router.navigate(['/cart']); }
+
+Динамические роуты (для деталки)
+1 - создаем роут с динамическим параметром
+  {path: 'posts/:id', component: PostComponent},
+2 - создаем ссылку на детальную информацию к примеру поста
+  <a [routerLink]="['/posts/', p.id]">{{p.title}}</a>
+
+Обработка параметров роута
+1 - инжектируем в наш компонент детальной инфо переменную route типа ActivatedRoute
+  constructor(private route: ActivatedRoute) { }
+2 - далее при инициализации класса мы можем брать параметры из параметра route
+  this.route.params.subscribe((params: Params) => console.log(params.id))
+3 - далее делаем сервис котолрый выбирает или запрашивает пост по его id
+  getPost(id: number) {return this.posts.find(p => p.id === id)}
+4 - инжектируем сервис в класс поста
+  constructor(private service: PostService) { }
+5 - теперь зная id и имея сервис фильтрации получаем пост
+  this.route.params.subscribe((params: Params) => { this.post = this.service.getPost(params.id) })
+
+Работа с query параметрами
+1 - указываем ссылке (или кнопке) какие параметры будем передавать
+  <a [routerLink]="['/posts/', p.id]" [queryParams]="{param: true}">link</a>
+  // /posts/1231/param=true
+2 - получаем на нужной странице параметр в объекте params
+  this.route.params.subscribe((params: Params) => console.log(params.param))
+3 - можно отправлять параметры с помощью программной навигации, для этого сначала
+  инжектируем в конструктор private router: Router и далее пользуемся навигацией
+  goToCart() { this.router.navigate(['/posts', 22], {queryParams: {param: true}}); }
+4 - также можно переходить на якоря (фрагменты) для этого в ссылку добавляем атрбут
+  <a [routerLink]="['/posts/', p.id]" fragment="header">link</a>
+  - в прогамном навигаторе также можно укахать фрагмент в объекте extras
+  goToCart() { this.router.navigate(['/posts', 22], {fragment: 'header'); }
+  - получить значение фрагмента можно в route и его поле fragment
+  this.route.fragment.subscribe(frag => console.log(frag))
+
+Вложенные роуты
+1 - в роутах в родительском роуте указываем параметр children с массивом роутов детей
+  {path: 'about', component: AboutComponent, children: [
+    {path: 'extra', component: AboutExtraComponent},
+  ]},
+2 - делаем ссылку на дочерний роут
+  <a [routerLink]="['/about/', 'extra']">daughter</a>
+3 - в родительском компоненте в шаблоне добавляем место рендеринга дочки
+  <router-outlet></router-outlet>
+
+Редирект и обработка ошибок
+1 - создаем страницу ошибки (компонент)
+2 - создаем роут для страницы ошибки
+  {path: 'error', component: ErrorComponent},
+3 - создаем роут для исключений куда будут попадать не описанные в роутере страницы
+  у него есть особенность. он должен объявляться последним в списке роутов
+  {path: '**', component: redirectTo: '/error'},
+
+Защита страниц
+1 - создаем класс защитник AuthGuard например и имплементируемся от CanActivate
+2 - теперь мы должны создать метод canActivate там короче пздц сложно
+  потом подсмотри как это в auth.guard.ts и в сервисе auth.service.ts
+3 - каждому защищаемому роуту добавляем параметр canActivate с массивом гардов
+  {path: 'posts', component: PostsComponent, canActivate: [AuthGuard]},
+
+Защита дочерних страниц
+1 - в гуарде добавляем имплемент от CanActivateChild
+2 - реализуем метод canActivateChild
+3 - также в дродительском роуте прописываем параметр canActivate Child и передаем массив гуардов
+
+Резолверы - позволяют заранее подгружать данные перед открытием страницы
+1 - создаем класс post.resolver.ts который экспортируем и имплементируемся от Resolve
+2 - реализуем класс resolve (смотреть в примере ибо мноа букав)
+3 - в роуте прописываем параметр resolve: { post: PostResolver }
+  после чего при переходе на страницу будет автоматически отрабатывать данный резолвер
+4 - теперь на нужной странице мы можем получить данне 2 вариантами:
+  1 - статический this.post = this.route.snapshot.data.post;
+  2 - реактивный с помощью observable
+    this.route.data.subscribe(data => { this.post = data.post; });
+
+----------------------------------------
+
+Модули - для декомпозиции приложения
+- модули обозначаются декоратором @NgModule который принимает опции:
+  - declarations - массив где регистрируются различные сущности:
+    компоненты, директивы, пайты
+  - imports - массив импортируемых модулей
+  - providers - массив для регистрации сервисов приложения
+  - bootstrap - объхявляется главный компонент
+  - exports - массив экспортируемых модулей которые становятся доступными там
+    где мы импортируем данный модуль
+
+1 - создаем модуль например about.module.ts и экспортируем класс
+2 - выносим все декларации относящиеся к about из модуля app и добавляем
+  их в модуль about.module
+3 - в app.module добавляем импорт на модуль about.module
+4 - мы можем в модули вынести какие то общие директивы пайпы и экспортировать их
+  затем подключить их в нужных модулях других компонентов
+5 - чтобы не было ошибок из-за отсутствующих импортов общих компонентов надо подключить
+  CommonModule из @angular/common
+6 - выносим роуты относящиеся к странице для которой делался модуль в этот модуль
+  но уже вместо параметра forRoot указываем параметр forChild
+  RouterModule.forChild([
+    {path: 'about', component: AboutComponent, canActivateChild: [AuthGuard], children: [
+      {path: 'extra', component: AboutExtraComponent},
+    ]},
+  ])
+  - затем эксполртируем этот локальный RouterModule
+
+Ленивая загрузка
+- для ленивой загрузки какого либо компонента мы прописываем в app.routing роут
+  где указываем дочерний модуль с дочерними роутами
+  {path: 'about', loadChildren: './about/about.module#AboutModule'},
+  или в новом синтаксисе можно написать так
+  {path: 'about', loadChildren: () => import('./about/about.module#AboutModule')
+    .then(m => m.AboutModule)},
+- затем мы можем удалить импорты дочернего модуля из родителя, они уже возьмутся из роута
+
+Стратегии загрузки модулей
+- в RouterModule в методе forRoot вторым параметром мы может передать опции,
+  и одной из них является preloadingStrategy
+  preloadingStrategy: PreloadingAllModules - сначала подкгружается все нобходимое а
+  потом уже остальные модули
+
+-----------------------------
+
+SEO. Работа с метатегами
+- Для работы с метатегами необходимо в конструктор главного компонента инжектировать
+  некоторые вещи из @angular/platform-browser:
+  - для работы с title:
+    private title: Title
+    const t = title.getTitle() // получить заголовок
+    title.srtTitle('New title') // устанавливаем заголовок
+  - для работы с мета тегами:
+    private meta: Meta
+    meta.addTags([{name: 'keywords', content: 'angular, js'}]) // устанавливаем метатег
+
+----------------------------
+
+PWA
+1 - ng add @angular/pwa // устанавливаем пакет и модифицируем наш проект как PWA
+  - добавляется в главный апп модуль ServiceWorkerModule
+  - в index.html добавляется метатег manifest, иконки и цвет темы
+  - создается manifest.webmanifest где находятся все настройки PWA приложения
+  - создается ngsw-config.json с базовыми настройками serviceWorker-а, там указываются
+    все элементы которые должны быть закешированны сервис воркером
+  - в пакеты устанавливаются @angular/pwa и @angular/service-worker
+2 - чтобы сбилдить на продакшин вводим ng build --prod
+
+----------------------------
+
+Анимации
+webAnimationsAPI - анимации на js
+1 - импортируем в модули imports: [BrowserAnimationsModule] из
+  @angular/platform-browser/animations
+2 - если нужны полифилы то идем в src/polyfills.ts и раскомментировав строку
+  import 'web-animations-js' делаем npm i web-animations-js
+3 - в компоненте в декораторе @Component есть массив animations где их описываем
+  импортируя разные функции анимаций из @angular/animations
+  - trigger
+  trigger('box', [ // название триггера (любое)
+    state('start', style({background: 'blue'})), // состояние начала (импорт оттуда же)
+    state('end', style({background: 'red', transform: 'scale(1.2)'})), сост.конца
+  ]),
+4 - далее в классе компонента заводим переменную например boxState = 'start';
+  она будет отвечать за состояние анимации нужного нам элемента
+5 - затем в шаблоне создаем для нужного блока анимацию
+  <div class="box" [@box]="boxState"></div>
+6 - создаем кнопку которая дерганет метод animate который будет менять наш boxState
+7 - для плавных переходов импортируем функции transition и animate применяем их
+  transition('start => end', animate(450)), // переход и время в милисек
+  transition('end => start', animate('800ms ease-in-out')), // обратный переход
+
+Сложные переходы
+  transition('special => *', animate(500)), // переход из special в любое другое
+  transition('* => special', animate(500)), // переход из любого другого в special
+  transition('special <=> *', animate(500)), // двустороннее связывание
+  transition('special <=> *', [ // массив шагов анимации
+    style({background: 'green'}), // будет стартовать с зеленого фона
+    animate('1s', style({background: 'pink'})), // по завершению порозовеет
+    animate(750) // и все это безобразие продолжится 750мс
+  ]),
+
+Появление исчезновение
+1 - в классе создаем переменную состояния visible = true;
+2 - делаем например кнопку которая меняет это состояние
+3 - обычным *ngIf-ом устанавливаем отображение нужного элемента
+4 - создаем в триггере транзишн
+  transition('void => *', [ // если пусто (не иф)
+    style({opacity: 0}),
+    animate('850ms easy')
+  ]),
+  transition('* => void', [ // если надо убрать
+    style({opacity: 1}),
+    animate('850ms easy', style({opacity: 0, transform: 'scale(1.2)'}))
+  ]),
+  - можно заменить 'void => *' на ':enter' а '* => void' на ':leave'
+
+Группировка анимаций
+- для запуска сгруппированных анимаций импортируем group и применяем в transition
+  group([
+    animate('850ms easy', style({opacity: 0, transform: 'scale(1.2)'})),
+    animate('850ms easy', style({color: 'red', fontWeight: 'bold'}))
+  ])
+
+Доступ до дочерних элементов
+- если в анимируемом элементе есть дочерние компоненты, то для доступа к ним
+  импортируем метод query. По умолчанию запустятся анимации последовательно
+  query('h4', animate(1500, style({fontSize: '30px'})))
+- если нужен тпаралельный запуск то также группируем это через group
+
+Шаги анимации
+1 - импортируем метод keyframes
+2 - в триггере в транзишне создаем анимацию с заданным временем и вторым параметром
+  передаем метод keyframes куда мы передаем массив стилей в методе style/
+  По умолчанию keyframes берет время анимации и делит на шаги добавления стилей
+  transition('void => *', [
+    animate('4s', keyframes([
+      style({background: 'red'}),
+      style({background: 'blue'}),
+      style({background: 'orange'}),
+      style({background: 'yellow'}),
+    ]))
+  ]),
+  - но мы можем управлять распределением времени анимацией
+  animate('4s', keyframes([
+    style({background: 'red', offset: 0}), // стартовое время
+    style({background: 'blue', offset: 0.2}), // за 20%
+    style({background: 'orange', offset: 0.4}), // за 40%
+    style({background: 'yellow', offset: 1}), // до конца
+  ]))
+
+События анимации - мы можем прослушивать события происходящие в нашем триггере
+1 - добавляем эвент эмиттер на блок анимации (start, done)
+  <div class="box" [@box]="boxState" (@box.start)="onStarted($event)"></div>
+2 - реализуем метод принимая переданный эвент с типом AnimationEvent
+  onStarted(e: AnimationEvent) { console.log(e) } // с этими данными можно работать
+
+Библиотека ng-animate - готовая библиотека анимаций https://www.npmjs.com/package/ng-animate
+1 - npm install ng-animate --save
+2 - импортируем компоненты из @angular/animations с хуком useAnimation
+  import { trigger, transition, useAnimation } from '@angular/animations';
+3 - импортируем нужную нам стилевую анимацию вместо того чтобы руками ее писать
+  import { bounce } from 'ng-animate';
+4 - применяем анимацию а транзишне
+  animations: [trigger('bounce', [transition('* => *', useAnimation(bounce))])],
+  <div [@bounce]="bounce"></div>
+  - в анимации можно передавать параметры
+  animations: [
+    trigger('bounce', [transition('* => *', useAnimation(bounce, {
+      params: { timing: 5, delay: 2 } // время выполнения и задержка
+    }))])
+  ],
+
+Внешнее хранение анимаций
+- для улучшения читаемости кода лучше выносить анимации в отдельный файл
+  например app.animations.ts откуда будем их экспортировать
+  export const boxAnimation = trigger(.......);
+  а в компоненте в моассив анимаций просто получить эту анимацию
+  animations: [boxAnimation]
+
+-------------------------
+
+Typescript
+
+Базовые типы
+const str: string = 'string'; // строковый тип
+const num: number = 22; // числовой тип
+const bool: boolean = true; // булев тип
+const arr: string[] = ['d', 'f']; // массив строк
+const arr: Array<number> = [1, 2, 3]; // массив чисел (вариант записи)
+
+function info(name: string, age: number): void { console.log('info', name, age); }
+function info(a: number, b: number): number { return a + b; }
+
+Классы
+private myVar - если хотим сделать свойство доступным только в этом классе
+public myVar - если хотим сделать свойство доступным везде
+protected myVar - свойство доступно только в этом классе и в дочерних классах
+
+- можем делать такие же приватные, публичные защищенные методы
+- получение значений из конструктора в переменные:
+  public name: string;
+  protected ip: number;
+  constructor(name: string, ip: number) { this.name = name; this.ip = ip}
+- упрощённая запись:
+  constructor(public name: string, protected ip: number) {}
+
+Интерфейсы и объекты
+- чтобы описать объект воспользуемся interface
+  interface IUser {
+    name: string; // обязательно поле строка
+    age?: number; // необязательное поле номер
+    logInfo: () => void // фукция ничего не возвращающая
+  }
+
+Интерфейсы и классы
+interface SayHello {
+  sayHello: () => void; // функция которую мы будем обязаны реализовать в классе
+}
+class User implements SayHello {...} // будет ошибка если не объявим метод sayHello
+
+Дженерики типы
+const arr: number[] = [1, 2, 3];
+const arr: Array<number> = [1, 2, 3]; // тип массив с наполнением числами
+
+11. Дополнительные возможности / 2-2:00
