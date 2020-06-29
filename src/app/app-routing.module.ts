@@ -14,6 +14,11 @@ const routes: Routes = [
       {path: '', component: HomePageComponent},
       {path: 'post/:id', component: PostPageComponent},
     ],
+  },
+  {
+    path: 'admin',
+    // делаем lazyLoading для админки
+    loadChildren: './admin/admin.module#AdminModule'
   }
 ];
 
